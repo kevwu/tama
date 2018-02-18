@@ -1,0 +1,18 @@
+{
+  "name": "tama",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kevin Wu",
+  "license": "ISC",
+  "dependencies": {
+    "electron": "^1.8.2",
+    "shortid": "^2.2.8",
+    "teoria": "^2.5.0",
+    "tone": "^0.11.11",
+    "webmidi": "^2.0.0"
+  }
+}
