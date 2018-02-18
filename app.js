@@ -37,19 +37,20 @@ WebMidi.enable((err) => {
 
 	let scale = new teoria.scale("A3", "major")
 
-	// TODO: faster event for drawing; let glide event handle only stepping and colors
+	let midiGrid = []
+	for(let i = 0; i < 8; i += 1) {
+		midiGrid[i] = [0,0,0,0,0,0,0,0]
+	}
 
-	let glide = new Tone.Event((time, pitch) => {
-		// clear out all previous pads
+	// rendering interval
+	setInterval(() => {
+		// blank out grid
+		for(let i = 0; i < 8; i += 1) {
+			midiGrid[i] = [0,0,0,0,0,0,0,0]
+		}
+
 		gliders.forEach((glider, i) => {
-			Launchpad.setPad(glider.row, glider.col, "off", 0)
-		})
-
-		gliders.forEach((glider, i) => {
-			glider.step()
-
 			let color
-
 			switch(glider.dir) {
 				case 'n':
 					color = 60
@@ -64,7 +65,20 @@ WebMidi.enable((err) => {
 					color = 62
 			}
 
-			Launchpad.setPad(glider.row, glider.col, "on", color)
+			midiGrid[glider.row - 1][glider.col - 1] = color
+		})
+
+		midiGrid.forEach((rowList, row) => {
+			rowList.forEach((cell, col) => {
+				Launchpad.setPad(row + 1, col + 1, "on", cell)
+			})
+
+		})
+	}, 10)
+
+	let glide = new Tone.Event((time, pitch) => {
+		gliders.forEach((glider, i) => {
+			glider.step()
 
 			let note
 			if(glider.dir === 'n' || glider.dir === 's') {
