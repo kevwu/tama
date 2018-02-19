@@ -87,8 +87,91 @@ WebMidi.enable((err) => {
 				note = scale.get(glider.row).scientific()
 			}
 
+
 			glider.onDirChange(() => {
 				synth.triggerAttackRelease(note, "16n")
+			})
+		})
+
+		// check all gliders against one another
+		// brute force, might need to change for more efficient method
+		let collided = []
+		gliders.forEach((a, i) => {
+			gliders.forEach((b, j) => {
+				if(collided[i] || collided[j]) {
+					return
+				}
+
+				if(i === j) {
+					return
+				}
+
+				if(a.row === b.row && a.col === b.col) {
+					/*const collisionMap = {
+						'n': {
+							'w': 'e',
+							'e': 'w',
+							's': 'n',
+						},
+						's': {
+							'w': 'e',
+							'e': 'w',
+							'n': 's',
+						},
+						'e': {
+							'n': 's',
+							's': 'n',
+							'w': 'e',
+						},
+						'w': {
+							'n': 's',
+							's': 'n',
+							'e': 'w',
+						}
+					}*/
+
+					// first index is current direction
+					// second index is direction of incoming collision
+					const collisionMap = {
+						'n': {
+							'w': 'e',
+							'e': 'e',
+							's': 'e',
+							'n': 'n',
+						},
+						's': {
+							'w': 'w',
+							'e': 'w',
+							'n': 'w',
+							's': 's',
+						},
+						'e': {
+							'n': 's',
+							's': 's',
+							'w': 's',
+							'e': 'e',
+						},
+						'w': {
+							'n': 'n',
+							's': 'n',
+							'e': 'n',
+							'w': 'w',
+						}
+					}
+
+					let aDir = a.dir
+					let bDir = b.dir
+
+					a.dir = collisionMap[aDir][bDir]
+					b.dir = collisionMap[bDir][aDir]
+
+					if(!a.dir || !b.dir) {
+						return
+					}
+
+					collided[i] = true
+					collided[j] = true
+				}
 			})
 		})
 	}, "")
