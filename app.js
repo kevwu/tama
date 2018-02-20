@@ -44,7 +44,48 @@ WebMidi.enable((err) => {
 
 	// rendering interval
 	setInterval(() => {
-		// blank out grid
+		// controls
+		Launchpad.setPad(9, 5, "off", 0)
+
+		let color
+		let col
+		switch(setDirection) {
+			case 'n':
+				color = 60
+				col = 1
+				break
+			case 's':
+				color = 64
+				col = 2
+				break
+			case 'w':
+				color = 62
+				col = 3
+				break
+			case 'e':
+				color = 51
+				col = 4
+				break
+		}
+
+		Launchpad.setPad(9, col, "on", color)
+
+		for(let i = 1; i <= 4; i += 1) {
+			if(i !== col) {
+				Launchpad.setPad(9, i, "off", 0)
+			}
+		}
+
+
+		if(Tone.Transport.state === "started") {
+			Launchpad.setPad(4, 9, "on", 27)
+		} else {
+			Launchpad.setPad(4, 9, "on", 60)
+		}
+
+		// render gliders
+
+		// blank out grid representation
 		for(let i = 0; i < 8; i += 1) {
 			midiGrid[i] = [0,0,0,0,0,0,0,0]
 		}
@@ -184,39 +225,28 @@ WebMidi.enable((err) => {
 	glide.start('@8n')
 
 	Launchpad.on("noteon", (row, col) => {
-		if(row === 9) {
-			Launchpad.setPad(9, 1, "off", 0)
-			Launchpad.setPad(9, 2, "off", 0)
-			Launchpad.setPad(9, 3, "off", 0)
-			Launchpad.setPad(9, 4, "off", 0)
-			Launchpad.setPad(9, 5, "off", 0)
-
-			let color
-
-			switch(col) {
-				case 1:
-					setDirection = 'n'
-					color = 60
-					break
-				case 2:
-					setDirection = 's'
-					color = 64
-					break
-				case 3:
-					setDirection = 'w'
-					color = 62
-					break
-				case 4:
-					setDirection = 'e'
-					color = 51
-					break
-				case 5:
-					gliders = []
-					Launchpad.clearAll()
+		if(col === 9) {
+			if(row === 4) {
+				Tone.Transport.toggle()
 			}
 
-			Launchpad.setPad(9, col, "on", color)
+			return
+		}
 
+		if(row === 9) {
+			if(col >= 1 && col <= 4) {
+				setDirection = {
+					1: 'n',
+					2: 's',
+					3: 'w',
+					4: 'e'
+				}[col]
+			}
+
+			if(col === 5) {
+				gliders = []
+				Launchpad.clearGrid()
+			}
 		} else {
 			gliders.push(new Glider(row, col, setDirection))
 		}
